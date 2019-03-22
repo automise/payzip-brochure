@@ -116,7 +116,7 @@ a:hover {
 }
 
 .nav-bar {
-  position: fixed;
+  position: absolute;
   left: 0px;
   top: 0px;
   right: 0px;
@@ -152,7 +152,9 @@ a:hover {
 }
 
 .section.what-we-do {
+  position: relative;
   padding-bottom: 0px;
+  clear: both;
   background-color: #fafafa;
 }
 
@@ -474,6 +476,7 @@ a:hover {
 }
 
 .hero-section {
+  position: relative;
   height: 750px;
   background-image: url('../images/PayZip-Hero-1800x1200-squashed.jpg');
   background-position: 50% 50%;
@@ -513,6 +516,10 @@ a:hover {
 
 .heading.features {
   text-align: left;
+}
+
+.heading.faq-heading {
+  margin-top: 60px;
 }
 
 .column-2 {
@@ -619,6 +626,86 @@ a:hover {
   font-size: 1em;
   text-decoration: underline;
   text-transform: capitalize;
+}
+
+.ea-banner {
+  position: relative;
+  display: inline-block;
+  height: 72px;
+  padding-top: 18px;
+  background-color: #dd3039;
+  color: #fff;
+  font-size: 18px;
+}
+
+.heading-3 {
+  margin-top: -29px;
+  color: #000;
+}
+
+.image-3 {
+  margin-top: -30px;
+}
+
+.faq-question {
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.container {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.faq-answer {
+  margin-top: 15px;
+  margin-bottom: 40px;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 400;
+  text-align: left;
+}
+
+.heading-4 {
+  margin-bottom: 26px;
+}
+
+.heading-4.faqs {
+  color: #dd3039;
+}
+
+.text-span {
+  font-family: Inconsolata, monospace;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.email-address {
+  font-family: Inconsolata, monospace;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.heading-5 {
+  margin-bottom: 16px;
+}
+
+.text-span-2 {
+  font-family: Inconsolata, monospace;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.link-block {
+  width: 100%;
+  background-color: #dd3039;
+}
+
+.ea-logo {
+  margin-top: -32px;
+  margin-right: 15px;
 }
 
 @media (max-width: 991px) {
@@ -838,6 +925,14 @@ a:hover {
   .footer-links {
     margin-bottom: 5px;
   }
+  .faq-question {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+  .faq-answer {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
 }
 
 @media (max-width: 479px) {
@@ -920,6 +1015,25 @@ a:hover {
   }
   .column-2 {
     padding-right: 10px;
+  }
+  .ea-banner {
+    height: 73px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .heading-3 {
+    font-size: 22px;
+  }
+  .faq-question {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+  .faq-answer {
+    margin-left: 10px;
+    padding-right: 10px;
+  }
+  .ea-logo {
+    margin-top: 19px;
   }
 }
 
