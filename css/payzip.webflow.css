@@ -116,10 +116,11 @@ a:hover {
 }
 
 .nav-bar {
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  right: 0px;
+  position: fixed;
+  left: 0%;
+  top: 0%;
+  right: 0%;
+  bottom: auto;
   height: 80px;
   background-color: #fff;
 }
@@ -174,8 +175,10 @@ a:hover {
 }
 
 .footer {
-  padding-top: 29px;
-  padding-bottom: 30px;
+  height: auto;
+  margin-top: 0px;
+  padding-top: 20px;
+  padding-bottom: 40px;
   background-color: #5287be;
 }
 
@@ -304,7 +307,7 @@ a:hover {
 }
 
 .features-row.top {
-  margin-bottom: 60px;
+  margin-bottom: 30px;
 }
 
 .features-description {
@@ -472,7 +475,12 @@ a:hover {
 }
 
 .sub-heading-text {
+  margin-top: 20px;
   text-align: left;
+}
+
+.sub-heading-text.proud {
+  text-align: center;
 }
 
 .hero-section {
@@ -533,8 +541,8 @@ a:hover {
 }
 
 .footer-row {
-  padding-top: 80px;
-  padding-bottom: 80px;
+  padding-top: 40px;
+  padding-bottom: 0px;
   background-color: #6894c2;
 }
 
@@ -639,7 +647,7 @@ a:hover {
 }
 
 .heading-3 {
-  margin-top: -29px;
+  margin-top: 0px;
   color: #000;
 }
 
@@ -647,21 +655,30 @@ a:hover {
   margin-top: -30px;
 }
 
+.image-3.ealogo {
+  margin-bottom: 20px;
+}
+
 .faq-question {
   margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  border-radius: 8px;
+  background-color: hsla(210.66666666666666, 100.00%, 88.84%, 1.00);
   font-size: 20px;
   font-weight: 600;
   text-align: left;
 }
 
 .container {
-  margin-top: 40px;
+  margin-top: 30px;
   margin-bottom: 40px;
 }
 
 .faq-answer {
-  margin-top: 15px;
-  margin-bottom: 40px;
+  margin-top: 20px;
+  margin-bottom: 50px;
   font-size: 16px;
   line-height: 22px;
   font-weight: 400;
@@ -674,6 +691,7 @@ a:hover {
 
 .heading-4.faqs {
   color: #dd3039;
+  font-weight: 600;
 }
 
 .text-span {
@@ -706,6 +724,14 @@ a:hover {
 .ea-logo {
   margin-top: -32px;
   margin-right: 15px;
+}
+
+.div-block {
+  margin-bottom: 20px;
+}
+
+.eafeatureblock {
+  margin-top: 20px;
 }
 
 @media (max-width: 991px) {
