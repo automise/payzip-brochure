@@ -439,8 +439,15 @@ figcaption {
 }
 
 .button.outline {
+  margin-right: 0px;
   border: 1px solid #fff;
   background-color: transparent;
+}
+
+.button.outline.solid {
+  margin-left: 20px;
+  border-style: none;
+  background-color: #5d89ba;
 }
 
 .button.dark-outline {
