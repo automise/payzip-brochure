@@ -1625,7 +1625,8 @@ figcaption {
 }
 
 .image-hero.busines-2 {
-  background-image: url('../images/PZ-Hero-Webflow.jpg');
+  background-image: url('../images/PZ-Hero-Webflow-min.jpg');
+  background-size: cover;
 }
 
 .image-hero.download {
