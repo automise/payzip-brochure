@@ -3353,7 +3353,6 @@ Webflow.define('links', module.exports = function ($, _) {
   var location = window.location;
   var tempLink = document.createElement('a');
   var linkCurrent = 'w--current';
-  var validHash = /^#[\w:.-]+$/;
   var indexPage = /index\.(html|php)$/;
   var dirList = /\/$/;
   var anchors;
@@ -3399,9 +3398,9 @@ Webflow.define('links', module.exports = function ($, _) {
 
     var $link = $(link);
 
-    // Check for valid hash links w/ sections and use scroll anchor
-    if (href.indexOf('#') === 0 && validHash.test(href)) {
-      var $section = $(href);
+    // Check for all links with hash (eg (this-host)(/this-path)#section) to this page
+    if (tempLink.hash.length > 1 && tempLink.host + tempLink.pathname === location.host + location.pathname) {
+      var $section = $(tempLink.hash);
       $section.length && anchors.push({ link: $link, sec: $section, active: false });
       return;
     }
@@ -5140,6 +5139,7 @@ Webflow.define('lightbox', module.exports = function ($) {
       }
     } else {
       data.items = json.items;
+      data.index = 0;
     }
   }
 
