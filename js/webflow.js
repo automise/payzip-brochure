@@ -3782,6 +3782,18 @@ Webflow.define('touch', module.exports = function ($) {
 var Webflow = __webpack_require__(0);
 var IXEvents = __webpack_require__(15);
 
+var KEY_CODES = {
+  ARROW_UP: 38,
+  ARROW_DOWN: 40,
+  ESCAPE: 27,
+  SPACE: 32,
+  ENTER: 13,
+  HOME: 36,
+  END: 35
+};
+
+var FORCE_CLOSE = true;
+
 Webflow.define('dropdown', module.exports = function ($, _) {
   var api = {};
   var $doc = $(document);
@@ -3832,7 +3844,12 @@ Webflow.define('dropdown', module.exports = function ($, _) {
     // Store state in data
     var data = $.data(el, namespace);
     if (!data) {
-      data = $.data(el, namespace, { open: false, el: $el, config: {} });
+      data = $.data(el, namespace, {
+        open: false,
+        el: $el,
+        config: {},
+        selectedIdx: -1
+      });
     }
     data.list = $el.children('.w-dropdown-list');
     data.toggle = $el.children('.w-dropdown-toggle');
@@ -3859,7 +3876,7 @@ Webflow.define('dropdown', module.exports = function ($, _) {
     if (designer) {
       $el.on('setting' + namespace, handler(data));
     } else {
-      data.toggle.on(mouseOrTap() + namespace, toggle(data));
+      data.toggle.on(mouseOrTap() + namespace, toggle(data, FORCE_CLOSE));
       if (data.config.hover) {
         data.toggle.on('mouseenter' + namespace, enter(data));
       }
@@ -3871,6 +3888,39 @@ Webflow.define('dropdown', module.exports = function ($, _) {
         close(data);
       }
     }
+
+    // ARIA
+    var listId = data.list.attr('id');
+    var toggleId = data.toggle.attr('id');
+
+    $el.attr('aria-role', 'menu');
+
+    // ARIA -- List
+    if (!listId) {
+      listId = 'w-dropdown-list-' + i;
+      data.list.attr('id', listId);
+    }
+
+    // Manage list item focus
+    $el.on('keyup', makeListItemFocusManager(data));
+
+    // ARIA -- Links
+    data.links.attr('tabindex', '-1');
+    data.links.attr('aria-role', 'menuitem');
+
+    // ARIA -- Toggle
+    if (!data.toggle.attr('tabindex')) {
+      data.toggle.attr('tabindex', '0');
+    }
+    if (!toggleId) {
+      listId = 'w-dropdown-toggle-' + i;
+      data.list.attr('id', listId);
+    }
+    data.toggle.attr('aria-controls', listId);
+    data.toggle.attr('aria-haspopup', 'menu');
+    data.toggle.on('keyup', makeToggleKeyupHandler(data));
+
+    $el.attr('aria-labelled-by', toggleId);
   }
 
   function configure(data) {
@@ -3889,21 +3939,26 @@ Webflow.define('dropdown', module.exports = function ($, _) {
       options = options || {};
 
       if (evt.type === 'w-close') {
-        return close(data);
+        return close(data, { focusToggle: false });
       }
 
       if (evt.type === 'setting') {
         configure(data);
         options.open === true && open(data, true);
-        options.open === false && close(data, true);
+        options.open === false && close(data, { immediate: true });
         return;
       }
     };
   }
 
-  function toggle(data) {
+  function toggle(data, forceClose) {
     return _.debounce(function () {
-      data.open ? close(data) : open(data);
+      if (data.open) {
+        return close(data, { forceClose: forceClose });
+      }
+
+      open(data);
+      focusSelectedLink(data);
     });
   }
 
@@ -3911,10 +3966,12 @@ Webflow.define('dropdown', module.exports = function ($, _) {
     if (data.open) {
       return;
     }
+
     closeOthers(data);
     data.open = true;
     data.list.addClass(stateOpen);
     data.toggle.addClass(stateOpen);
+    data.toggle.attr('aria-expanded', 'true'); // ARIA
     ix.intro(0, data.el[0]);
     Webflow.redraw.up();
 
@@ -3937,14 +3994,26 @@ Webflow.define('dropdown', module.exports = function ($, _) {
     window.clearTimeout(data.delayId);
   }
 
-  function close(data, immediate) {
+  function close(data) {
+    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        immediate = _ref.immediate,
+        forceClose = _ref.forceClose,
+        _ref$focusToggle = _ref.focusToggle,
+        focusToggle = _ref$focusToggle === undefined ? true : _ref$focusToggle;
+
     if (!data.open) {
       return;
     }
 
     // Do not close hover-based menus if currently hovering
-    if (data.config.hover && data.hovering) {
+    if (data.config.hover && data.hovering && !forceClose) {
       return;
+    }
+
+    data.toggle.removeAttr('aria-expanded'); // ARIA
+
+    if (focusToggle) {
+      data.toggle.focus(); // ARIA -- Focus management
     }
 
     data.open = false;
@@ -4029,13 +4098,21 @@ Webflow.define('dropdown', module.exports = function ($, _) {
     return function () {
       data.hovering = true;
       open(data);
+      if (!data.links.is(':focus')) {
+        data.toggle.focus();
+      }
     };
   }
 
   function leave(data) {
     return function () {
       data.hovering = false;
-      close(data);
+
+      // We do not want the list to close upon mouseleave
+      // if one of the links has focus
+      if (!data.links.is(':focus')) {
+        close(data);
+      }
     };
   }
 
@@ -4058,6 +4135,112 @@ Webflow.define('dropdown', module.exports = function ($, _) {
         close(data);
       }
     });
+  }
+
+  function makeListItemFocusManager(data) {
+    return function (evt) {
+      // Do not respond to keyboard events in designer or preview mode,
+      // or if the list is not open or toggle contains focus
+      if (designer || inPreview || !data.open && !data.toggle.is(':focus')) return;
+
+      // We do not want to honor hover settings if interacting
+      // via keyboard
+
+      switch (evt.keyCode) {
+        case KEY_CODES.HOME:
+          {
+            if (!data.open) return;
+
+            data.selectedIdx = 0;
+            focusSelectedLink(data);
+
+            return;
+          }
+
+        case KEY_CODES.END:
+          {
+            if (!data.open) return;
+
+            data.selectedIdx = data.links.length - 1;
+            focusSelectedLink(data);
+
+            return;
+          }
+
+        case KEY_CODES.ENTER:
+        case KEY_CODES.SPACE:
+        case KEY_CODES.ESCAPE:
+          {
+            close(data, { forceClose: true });
+
+            return;
+          }
+
+        case KEY_CODES.ARROW_DOWN:
+          {
+            data.selectedIdx = Math.min(data.links.length - 1, data.selectedIdx + 1);
+
+            if (data.selectedIdx >= 0) {
+              if (!data.open) {
+                // When opening dropdown via down arrow, we want
+                // to start on the first element, not to resume
+                // where we had focus when we previously closed
+                // the dropdown
+                data.selectedIdx = 0;
+              }
+              open(data);
+              focusSelectedLink(data);
+            }
+
+            return;
+          }
+
+        case KEY_CODES.ARROW_UP:
+          {
+            data.selectedIdx = Math.max(-1, data.selectedIdx - 1);
+
+            if (data.selectedIdx < 0) {
+              close(data, { immediate: true, forceClose: true });
+              data.toggle.focus(); // We want to focus the toggle
+              //                      even if the mouse is forcing
+              //                      open the list
+            } else {
+              open(data);
+              focusSelectedLink(data);
+            }
+
+            return;
+          }
+
+        default:
+          {
+            return; // noop
+          }
+      }
+    };
+  }
+
+  function focusSelectedLink(data) {
+    if (data.links[data.selectedIdx]) {
+      data.links[data.selectedIdx].focus();
+    }
+  }
+
+  function makeToggleKeyupHandler(data) {
+    var toggler = toggle(data, FORCE_CLOSE); // We do not want to honor
+    //                                          hover settings if interacting
+    //                                          via keyboard
+
+    return function (evt) {
+      // Do not respond to keyboard events in designer or preview
+      if (designer || inPreview) return;
+
+      if (evt.keyCode === KEY_CODES.SPACE || evt.keyCode === KEY_CODES.ENTER) {
+        // Do not want to trigger list item focus manager event handler
+        evt.stopPropagation();
+        toggler();
+      }
+    };
   }
 
   function mouseOrTap() {
